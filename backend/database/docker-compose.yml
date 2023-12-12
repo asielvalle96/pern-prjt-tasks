@@ -1,0 +1,81 @@
+# Versión de docker-compose: (https://docs.docker.com/compose/compose-file/compose-versioning/).
+version: '3.8'
+# services contiene los contenedores (programas) que necesito. Poner nombre sugerente a cada contenedor.
+services:
+  # Primer contenedor (programa) a ejecutar (la DB)
+  postgres:
+    # Nombre del contenedor.
+    container_name: postgres_container
+    # Imagen del contenedor. No especifiqué la versión (postgres:9.6) para que ejecute la última.
+    image: postgres
+    # Si, el contenedor se cae, siempre vuelva a reiniciarse.
+    restart: always
+    # Para darle unas configuraciones iniciales al contenedor en cuestión (postgres).
+    environment:
+      # Nombre para el usuario por defecto.
+      POSTGRES_USER: myuserinpostgres
+      # Contraseña para el usuario por defecto.
+      POSTGRES_PASSWORD: my****inpostgres+8
+      # Nombre de la Base de Datos.
+      POSTGRES_DB: tasksdb
+      POSTGRES_HOST: localhost     
+    # Puerto en que se va a ejecutar el contenedor en cuestión (postgres).
+    ports:
+      # "<puerto en el que quiero que se ejecute en el navegador>:<puerto dentro de Docker>"
+      - "5432:5432"
+    # Crear un volumen para dar persistencia a los datos de la BD.
+    volumes:
+      - postgres-data:/var/lib/postgresql/data  
+
+  # Segundo contenedor (programa) a ejecutar (pgadmin ===> manejador de la BD con interfaces).
+  pgadmin:
+    # Nombre del contenedor.
+    container_name: pgadmin_container
+    # Imagen del contenedor.
+    image: dpage/pgadmin4
+    # Si, el contenedor se cae, siempre vuelva a reiniciarse.
+    restart: always
+    # Para darle unas configuraciones iniciales al contenedor en cuestión (pgadmin).
+    environment:
+      # Correo por defecto para loguearse en la web de pgAdmin4.
+      PGADMIN_DEFAULT_EMAIL: 'asielvallevalera@gmail.com'
+      # Contraseña por defecto para loguearse en la web de pgAdmin4.
+      PGADMIN_DEFAULT_PASSWORD: 'my****inpgadmin+8'
+    # Puerto para conectarse a pgAdmin4.
+    ports:
+      # "<puerto en el que quiero que se ejecute en el navegador>:<puerto dentro de Docker>"
+      - "5050:80"
+    # Para que este contenedor pgadmin inicie después del contenedor postgres.
+    depends_on:
+      # Nombre del contenedor que va a iniciar primero que este contenedor (pgadmin).
+      - postgres
+    # Crear un volumen para dar persistencia a los datos de la DB.
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+# The volumes will give persistence to the data in the DB.
+volumes:
+  postgres-data:
+  pgadmin-data:
+  
+# `docker-compose up` --------------- To run this file with PostgreSQL and Pgadmin for my DB.
+
+# Para ejecutar este archivo de comandos:
+#   1. Instalar y Ejecutar Docker.
+#     - Si error wsl, abrir CMD en modo admin y ejecutar wsl --update.
+#   2. Copiar este archivo en cuestion (docker-compose.yml) dentro del proyecto.
+#   3. Abrir una terminal en la carpeta que contiene este archivo y ejecutar `docker-compose up`.
+#   4. Ir a: http://localhost:5050/. Entrar con las credenciales definidas en el archivo para pgadmin.
+#   5. En la web de pgadmin vamos a conectar a la DB creada en el servicio: postgres.
+#     - Click secunadario Servers/Register/Server...
+#     - Pestaña "General":
+#       - Name: <anything name> 
+#     - Pestaña "Connection":
+#       - Host name/address: nombre del servicio de la imagen de postgres en el docker-compose.yml (postgres, en este caso)
+#       - Username: valor del atributo: POSTGRES_USER
+#       - Password: valor del atributo: POSTGRES_PASSWORD
+#     - Click al botón: Save.
+#     ❗Ver la captura de pantalla "connection_conf_in_pgAdmin.png" en esta carpeta si tengo dudas.
+#   6. Conectar la aplicación backend con el string de conexión.
+
+# Remember, I should create the table "task".

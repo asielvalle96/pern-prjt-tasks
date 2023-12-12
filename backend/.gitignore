@@ -1,0 +1,8 @@
+# NodeJS
+node_modules
+
+# To run postgres and pgadmin.
+# docker-compose.yml
+
+# Environment variables
+# .env
